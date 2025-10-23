@@ -1,17 +1,17 @@
 import express from "express";
 import path from "path";
-import dotenv from "dotenv";
+
 import { fileURLToPath } from "url";
-dotenv.config();
 
 import { connectDB } from "./lib/connectDb.js";
 import userRouter from "./routes/auth.routes.js";
+import { ENV } from "./lib/env.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = ENV.PORT || 3000;
 
 app.use(express.json());
 
@@ -23,7 +23,7 @@ app.get("/test", (req, res) => {
 });
 
 // production setup
-if (process.env.NODE_ENV === "production") {
+if (ENV.NODE_ENV === "production") {
   const distPath = path.join(__dirname, "../../frontend/dist");
   app.use(express.static(distPath));
   console.log("Serving index from:", path.resolve(distPath, "index.html"));
