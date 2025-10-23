@@ -1,28 +1,40 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
+import { fileURLToPath } from "url";
 dotenv.config();
+
 import { connectDB } from "./lib/connectDb.js";
 import userRouter from "./routes/auth.routes.js";
-const app = express();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
 const PORT = process.env.PORT || 3000;
+
 app.use(express.json());
 
-const __dirname = path.resolve();
-// routes here
+// routes
 app.use("/api/auth", userRouter);
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frotend/dist")));
+app.get("/test", (req, res) => {
+  res.send("Server is working!");
+});
 
-  app.get("*", (_, res) => {
-    // res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-    res.sendFile(path.resolve(__dirname, "../frontend/dist/index.html"));
+// production setup
+if (process.env.NODE_ENV === "production") {
+  const distPath = path.join(__dirname, "../../frontend/dist");
+  app.use(express.static(distPath));
+  console.log("Serving index from:", path.resolve(distPath, "index.html"));
+
+  // this must come AFTER all API routes
+  app.get(/^(?!\/api).*/, (_, res) => {
+    res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
 
 app.listen(PORT, () => {
   connectDB();
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`✅ Server is running on port ${PORT}`);
 });
